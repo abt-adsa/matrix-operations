@@ -44,12 +44,12 @@ def calc_determinant(matrix: List[List[float]]) -> float:
         det: float = 0.0
         for j in range(len(matrix[0])):
             sign: int = (-1) ** j
-            det += sign * matrix[0][j] * calc_determinant(get_minor(matrix, 0, j))
+            det += sign * matrix[0][j] * calc_determinant(get_submatrix(matrix, 0, j))
     return det
 
 
-def get_minor(matrix: List[List[float]], i: int, j: int) -> List[List[float]]:
-    """Generates the minor of a matrix by removing the specified row and column."""
+def get_submatrix(matrix: List[List[float]], i: int, j: int) -> List[List[float]]:
+    """Generates a submatrix for minor calculation"""
     return [row[:j] + row[j+1:] for row in (matrix[:i] + matrix[i+1:])]
 
 
@@ -60,7 +60,7 @@ def calc_cofactor(matrix: List[List[float]]) -> List[List[float]]:
         cof_row: List[float] = []
         for j in range(len(matrix)):
             sign: int = (-1) ** (i + j)
-            cof_row.append(sign * calc_determinant(get_minor(matrix, i, j)))
+            cof_row.append(sign * calc_determinant(get_submatrix(matrix, i, j)))
         cof_matrix.append(cof_row)
     return cof_matrix
 
