@@ -5,52 +5,55 @@ def input_matrix() -> List[List[float]]:
     """Prompts user to input a matrix."""
     while True:
         try:
-            n: int = int(input("Matrix dimension (nxn): "))
-            if n <= 0:
-                raise ValueError("Dimension must be a positive integer.")
+            n: int = int(input("\n[Enter '0' to exit]"
+                               "\nMatrix dimension (nxn): "))
+            if n < 0:
+                raise ValueError("Must be a positive integer")
+            elif n == 0:
+                return None
             break
         except ValueError as e:
-            print(f"Invalid input: {e}. Please enter a valid dimension.")
+            print(f"Invalid input: {e}. Enter a valid dimension.")
 
     matrix: List[List[float]] = []
-    print("Input matrix row by row:")
+    print("Input matrix row by row [Ex. -2 0 3.14]:")
     for _ in range(n):
         while True:
             try:
                 row: List[float] = list(map(float, input().split()))
                 if len(row) != n:
-                    raise ValueError(f"Row must have {n} elements.")
+                    raise ValueError(f"Row must have {n} elements")
                 matrix.append(row)
                 break
             except ValueError as e:
-                print(f"Invalid input: {e}. Please enter the row again.")
+                print(f"Invalid input: {e}. Enter the row again.")
     return matrix
 
 
 def display_matrix(matrix: List[List[float]]) -> None:
     """Prints the given matrix."""
-    print("Output:")
     for row in matrix:
         print(' '.join(map(str, row)))
+
+
+def get_submatrix(matrix: List[List[float]],
+                  i: int, j: int) -> List[List[float]]:
+    """Generates a submatrix by removing row and column indices i and j"""
+    return [row[:j] + row[j+1:] for row in (matrix[:i] + matrix[i+1:])]
 
 
 def calc_determinant(matrix: List[List[float]]) -> float:
     """Calculates the determinant of a matrix."""
     if len(matrix) == 1:
         return matrix[0][0]
-    elif len(matrix) == 2:
-        return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
     else:
         det: float = 0.0
         for j in range(len(matrix[0])):
             sign: int = (-1) ** j
-            det += sign * matrix[0][j] * calc_determinant(get_submatrix(matrix, 0, j))
+            element: float = matrix[0][j]
+            submatrix: List[List[float]] = get_submatrix(matrix, 0, j)
+            det += sign * element * calc_determinant(submatrix)
     return det
-
-
-def get_submatrix(matrix: List[List[float]], i: int, j: int) -> List[List[float]]:
-    """Generates a submatrix for minor calculation"""
-    return [row[:j] + row[j+1:] for row in (matrix[:i] + matrix[i+1:])]
 
 
 def calc_cofactor(matrix: List[List[float]]) -> List[List[float]]:
@@ -104,12 +107,12 @@ def main() -> None:
 
     while True:
         print(
-            "\n 1 - Determinant"
-            "\n 2 - Transpose"
-            "\n 3 - Cofactor Matrix"
-            "\n 4 - Adjugate Matrix"
-            "\n 5 - Inverse Matrix"
-            "\n 0 - Exit"
+            "\n1 - Determinant"
+            "\n2 - Transpose"
+            "\n3 - Cofactor Matrix"
+            "\n4 - Adjugate Matrix"
+            "\n5 - Inverse Matrix"
+            "\n0 - Exit"
         )
 
         try:
