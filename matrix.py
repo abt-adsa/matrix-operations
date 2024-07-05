@@ -136,7 +136,7 @@ def main() -> None:
             display_matrix(calc_adjugate(matrix))
         elif choice == 5:
             try:
-                inv = calc_inverse(matrix)
+                inv: List[List[float]] = calc_inverse(matrix)
                 print("\nInverse Matrix:")
                 display_matrix(inv)
             except ZeroDivisionError as e:

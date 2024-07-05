@@ -108,7 +108,7 @@ def main() -> None:
         print("\nInput Matrix:")
         display_matrix(matrix)
         try:
-            inv = calc_inverse(matrix)
+            inv: List[List[float]] = calc_inverse(matrix)
             print("\nInverse Matrix:")
             display_matrix(inv)
         except ZeroDivisionError as e:

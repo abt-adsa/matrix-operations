@@ -63,7 +63,7 @@ def main() -> None:
             break
         print("\nInput Matrix:")
         display_matrix(matrix)
-        det = calc_determinant(matrix)
+        det: float = calc_determinant(matrix)
         print("\nDeterminant:", det)
 
 

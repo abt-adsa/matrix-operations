@@ -87,7 +87,7 @@ def main() -> None:
             break
         print("\nInput Matrix:")
         display_matrix(matrix)
-        adj = transpose(calc_cofactor(matrix))
+        adj: List[List[float]] = transpose(calc_cofactor(matrix))
         print("\nAdjugate:")
         display_matrix(adj)
 
