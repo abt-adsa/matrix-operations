@@ -36,8 +36,7 @@ def display_matrix(matrix: List[List[float]]) -> None:
         print(' '.join(map(str, row)))
 
 
-def get_submatrix(matrix: List[List[float]],
-                  i: int, j: int) -> List[List[float]]:
+def get_submatrix(matrix: List[List[float]], i: int, j: int) -> List[List[float]]:
     """Generates a submatrix by removing row and column indices i and j"""
     return [row[:j] + row[j+1:] for row in (matrix[:i] + matrix[i+1:])]
 
@@ -63,7 +62,8 @@ def calc_cofactor(matrix: List[List[float]]) -> List[List[float]]:
         cof_row: List[float] = []
         for j in range(len(matrix)):
             sign: int = (-1) ** (i + j)
-            cof_row.append(sign * calc_determinant(get_submatrix(matrix, i, j)))
+            submatrix: List[List[float]] = get_submatrix(matrix, i, j)
+            cof_row.append(sign * calc_determinant(submatrix))
         cof_matrix.append(cof_row)
     return cof_matrix
 
@@ -86,12 +86,12 @@ def calc_adjugate(matrix: List[List[float]]) -> List[List[float]]:
 
 def calc_inverse(matrix: List[List[float]]) -> List[List[float]]:
     """Calculates the inverse of the matrix."""
+    inv_matrix: List[List[float]] = []
+    adj: List[List[float]] = calc_adjugate(matrix)
     det: float = calc_determinant(matrix)
     if det == 0:
         raise ZeroDivisionError("Matrix is singular and cannot be inverted.")
-    adj: List[List[float]] = calc_adjugate(matrix)
-    inv_matrix: List[List[float]] = []
-    for i in range(len(matrix)):
+    for i in range(len(adj)):
         inv_row: List[float] = []
         for j in range(len(adj)):
             inv_row.append(adj[i][j] / det)
