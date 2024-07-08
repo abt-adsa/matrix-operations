@@ -1,119 +1,129 @@
-from typing import List
+'''Import standard decimal module to avoid rounding errors'''
+from decimal import getcontext, Decimal, InvalidOperation
 
 
-def input_matrix() -> List[List[float]]:
-    """Prompts user to input a matrix."""
+getcontext().prec = 5  # Set precision to 5 decimal places
+
+
+def input_matrix() -> list[list[Decimal]]:
+    '''Prompts user input for matrix dimension and elements.'''
     while True:
         try:
-            n: int = int(input("\n[Enter '0' to exit]"
-                               "\nMatrix dimension (nxn): "))
-            if n < 0:
-                raise ValueError("Must be a positive integer")
-            elif n == 0:
+            print("\n[Enter 0 to exit]")
+            dim = int(input("Enter matrix dimension: "))
+            if dim < 0:
+                raise ValueError
+            if dim == 0:
                 return None
             break
-        except ValueError as e:
-            print(f"Invalid input: {e}. Enter a valid dimension.")
+        except ValueError:
+            print("Error: Enter positive integer.")
 
-    matrix: List[List[float]] = []
-    print("Input matrix row by row [Ex. -2 0 3.14]:")
-    for _ in range(n):
+    matrix: list[list[Decimal]] = []
+    print("\nInput matrix elements row-by-row:")
+    for _ in range(dim):
         while True:
             try:
-                row: List[float] = list(map(float, input().split()))
-                if len(row) != n:
-                    raise ValueError(f"Row must have {n} elements")
+                # Convert input string of space-separated values to a list of Decimals
+                row = list(map(Decimal, input().split()))
+                if len(row) != dim:
+                    raise ValueError
                 matrix.append(row)
                 break
-            except ValueError as e:
-                print(f"Invalid input: {e}. Enter the row again.")
+            except ValueError:
+                print(f"Error: Enter exactly {dim} elements.")
+            except InvalidOperation:
+                print("Error: Enter numerical elements separated by spaces.")
+    print("\nInput Matrix:")
+    display_matrix(matrix)
     return matrix
 
 
-def display_matrix(matrix: List[List[float]]) -> None:
-    """Prints the given matrix."""
+def display_matrix(matrix: list[list[Decimal]]) -> None:
+    '''Prints the matrix row-by-row'''
     for row in matrix:
         print(' '.join(map(str, row)))
 
 
-def get_submatrix(matrix: List[List[float]], i: int, j: int) -> List[List[float]]:
-    """Generates a submatrix by removing row and column indices i and j"""
-    return [row[:j] + row[j+1:] for row in (matrix[:i] + matrix[i+1:])]
+def get_submatrix(matrix: list[list[Decimal]], i: int, j: int) -> list[list[Decimal]]:
+    '''Generates submatrix by removing the indexed row and column'''
+    return [row[:j] + row[j+1 :] for row in (matrix[:i] + matrix[i+1 :])]
 
 
-def calc_determinant(matrix: List[List[float]]) -> float:
-    """Calculates the determinant of a matrix."""
+def calc_determinant(matrix: list[list[Decimal]]) -> Decimal:
+    '''Calculates the determinant of the matrix.'''
     if len(matrix) == 1:
-        return matrix[0][0]
-    else:
-        det: float = 0.0
-        for j in range(len(matrix[0])):
-            sign: int = (-1) ** j
-            element: float = matrix[0][j]
-            submatrix: List[List[float]] = get_submatrix(matrix, 0, j)
-            det += sign * element * calc_determinant(submatrix)
-    return det
+        return matrix[0][0]  # Determinant of 1x1 matrix is its only element
+    
+    matrix_det = Decimal(0)
+    for j in range(len(matrix)):
+        sign: int = (-1) ** j
+        element: Decimal = matrix[0][j]
+        submatrix_det: Decimal = calc_determinant(get_submatrix(matrix, 0, j))
+        matrix_det += sign * element * submatrix_det  # Laplace Expansion
+    return matrix_det
 
 
-def calc_cofactor(matrix: List[List[float]]) -> List[List[float]]:
-    """Calculates the cofactor matrix."""
-    cof_matrix: List[List[float]] = []
+def calc_cofactor(matrix: list[list[Decimal]]) -> list[list[Decimal]]:
+    '''Calculates the cofactor matrix.'''
+    cofactor_matrix: list[list[Decimal]] = []
     for i in range(len(matrix)):
-        cof_row: List[float] = []
+        cofactor_row: list[Decimal] = []
         for j in range(len(matrix)):
-            sign: int = (-1) ** (i + j)
-            submatrix: List[List[float]] = get_submatrix(matrix, i, j)
-            cof_row.append(sign * calc_determinant(submatrix))
-        cof_matrix.append(cof_row)
-    return cof_matrix
+            sign: int = (-1) ** i+j
+            submatrix_det: Decimal = calc_determinant(get_submatrix(matrix, i, j))
+            cofactor_row.append(sign * submatrix_det)
+        cofactor_matrix.append(cofactor_row)
+    return cofactor_matrix
 
 
-def transpose(matrix: List[List[float]]) -> List[List[float]]:
-    """Transposes the given matrix."""
-    transposed: List[List[float]] = []
+def get_transpose(matrix: list[list[Decimal]]) -> list[list[Decimal]]:
+    '''Generates transpose by swapping row and column elements.'''
+    transpose: list[list[Decimal]] = []
     for i in range(len(matrix)):
-        trans_row: List[float] = []
+        trans_row: list[Decimal] = []
         for j in range(len(matrix)):
-            trans_row.append(matrix[j][i])
-        transposed.append(trans_row)
-    return transposed
+            trans_row.append(matrix[j][i])  # Swaps row and column indices
+        transpose.append(trans_row)
+    return transpose
 
 
-def calc_adjugate(matrix: List[List[float]]) -> List[List[float]]:
-    """Calculates the adjugate of the matrix."""
-    return transpose(calc_cofactor(matrix))
+def calc_adjugate(matrix: list[list[Decimal]]):
+    '''Calculates the matrix adjugate'''
+    return get_transpose(calc_cofactor(matrix))
 
 
-def calc_inverse(matrix: List[List[float]]) -> List[List[float]]:
-    """Calculates the inverse of the matrix."""
-    inv_matrix: List[List[float]] = []
-    adj: List[List[float]] = calc_adjugate(matrix)
-    det: float = calc_determinant(matrix)
-    if det == 0:
-        raise ZeroDivisionError("Matrix is singular and cannot be inverted.")
-    for i in range(len(adj)):
-        inv_row: List[float] = []
-        for j in range(len(adj)):
-            inv_row.append(adj[i][j] / det)
-        inv_matrix.append(inv_row)
-    return inv_matrix
+def calc_inverse(matrix: list[list[Decimal]]):
+    '''Calculates the matrix inverse'''
+    inverse: list[list[Decimal]] = []
+    determinant: Decimal = calc_determinant(matrix)
+    adjugate: list[list[Decimal]] = calc_adjugate(matrix)
+
+    if determinant == 0:
+        raise ZeroDivisionError("Cannot invert singular matrix.")
+    
+    for i in range(len(matrix)):
+        inverse_row: list[Decimal] = []
+        for j in range(len(matrix)):
+            inverse_row.append(adjugate[i][j] / determinant)
+        inverse.append(inverse_row)
+    return inverse
 
 
 def main() -> None:
-    """Main function to run the matrix operations."""
+    '''Entry point for program that runs all other functions.'''
     while True:
-        matrix: List[List[float]] = input_matrix()
-        if matrix == None:
+        print("\n---------- New Instance ----------")
+        matrix: list[list[Decimal]] = input_matrix()
+        if matrix is None:
             break
-        print("\nInput Matrix:")
-        display_matrix(matrix)
         try:
-            inv: List[List[float]] = calc_inverse(matrix)
+            inverse: list[list[Decimal]] = calc_inverse(matrix)
             print("\nInverse Matrix:")
-            display_matrix(inv)
+            display_matrix(inverse)
         except ZeroDivisionError as e:
             print(e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

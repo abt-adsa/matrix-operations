@@ -1,70 +1,78 @@
-from typing import List
+'''Import standard decimal module to avoid rounding errors'''
+from decimal import getcontext, Decimal, InvalidOperation
 
 
-def input_matrix() -> List[List[float]]:
-    """Prompts user to input a matrix."""
+getcontext().prec = 5  # Set precision to 5 decimal places
+
+
+def input_matrix() -> list[list[Decimal]]:
+    '''Prompts user input for matrix dimension and elements.'''
     while True:
         try:
-            n: int = int(input("\n[Enter '0' to exit]"
-                               "\nMatrix dimension (nxn): "))
-            if n < 0:
-                raise ValueError("Must be a positive integer")
-            elif n == 0:
+            print("\n[Enter 0 to exit]")
+            dim = int(input("Enter matrix dimension: "))
+            if dim < 0:
+                raise ValueError
+            if dim == 0:
                 return None
             break
-        except ValueError as e:
-            print(f"Invalid input: {e}. Enter a valid dimension.")
+        except ValueError:
+            print("Error: Enter positive integer.")
 
-    matrix: List[List[float]] = []
-    print("Input matrix row by row [Ex. -2 0 3.14]:")
-    for _ in range(n):
+    matrix: list[list[Decimal]] = []
+    print("\nInput matrix elements row-by-row:")
+    for _ in range(dim):
         while True:
             try:
-                row: List[float] = list(map(float, input().split()))
-                if len(row) != n:
-                    raise ValueError(f"Row must have {n} elements")
+                # Convert input string of space-separated values to a list of Decimals
+                row = list(map(Decimal, input().split()))
+                if len(row) != dim:
+                    raise ValueError
                 matrix.append(row)
                 break
-            except ValueError as e:
-                print(f"Invalid input: {e}. Enter the row again.")
+            except ValueError:
+                print(f"Error: Enter exactly {dim} elements.")
+            except InvalidOperation:
+                print("Error: Enter numerical elements separated by spaces.")
+    print("\nInput Matrix:")
+    display_matrix(matrix)
     return matrix
 
 
-def display_matrix(matrix: List[List[float]]) -> None:
-    """Prints the given matrix."""
+def display_matrix(matrix: list[list[Decimal]]) -> None:
+    '''Prints the matrix row-by-row'''
     for row in matrix:
         print(' '.join(map(str, row)))
 
 
-def get_submatrix(matrix: List[List[float]], i: int, j: int) -> List[List[float]]:
-    """Generates a submatrix by removing row and column indices i and j"""
-    return [row[:j] + row[j+1:] for row in (matrix[:i] + matrix[i+1:])]
+def get_submatrix(matrix: list[list[Decimal]], i: int, j: int) -> list[list[Decimal]]:
+    '''Generates submatrix by removing the indexed row and column'''
+    return [row[:j] + row[j+1 :] for row in (matrix[:i] + matrix[i+1 :])]
 
 
-def calc_determinant(matrix: List[List[float]]) -> float:
-    """Calculates the determinant of a matrix."""
+def calc_determinant(matrix: list[list[Decimal]]) -> Decimal:
+    '''Calculates the determinant of the matrix.'''
     if len(matrix) == 1:
-        return matrix[0][0]
-    else:
-        det: float = 0.0
-        for j in range(len(matrix[0])):
-            sign: int = (-1) ** j
-            element: float = matrix[0][j]
-            submatrix: List[List[float]] = get_submatrix(matrix, 0, j)
-            det += sign * element * calc_determinant(submatrix)
-    return det
+        return matrix[0][0]  # Determinant of 1x1 matrix is its only element
+    
+    matrix_det = Decimal(0)
+    for j in range(len(matrix)):
+        sign: int = (-1) ** j
+        element: Decimal = matrix[0][j]
+        submatrix_det: Decimal = calc_determinant(get_submatrix(matrix, 0, j))
+        matrix_det += sign * element * submatrix_det  # Laplace Expansion
+    return matrix_det
 
 
 def main() -> None:
-    """Main function to run the matrix operations."""
+    '''Entry point for program that runs all other functions.'''
     while True:
-        matrix: List[List[float]] = input_matrix()
-        if matrix == None:
+        print("\n---------- New Instance ----------")
+        matrix: list[list[Decimal]] = input_matrix()
+        if matrix is None:
             break
-        print("\nInput Matrix:")
-        display_matrix(matrix)
-        det: float = calc_determinant(matrix)
-        print("\nDeterminant:", det)
+        determinant: Decimal = calc_determinant(matrix)
+        print("\nDeterminant:", determinant)
 
 
 if __name__ == '__main__':
