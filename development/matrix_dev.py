@@ -106,13 +106,13 @@ def main():
             "\n1 - Determinant"
             "\n2 - Transpose"
             "\n3 - Cofactor Matrix"
-            "\n4 - Adjugate Matrix"
-            "\n5 - Inverse Matrix"
+            "\n4 - Adjugate"
+            "\n5 - Inverse"
             "\nE - Exit"
             "\nN - New matrix"
         )
         choice = input("\nEnter number of operation: ")
-        if choice not in ('1','2','3','4','5','E','N'):
+        if choice not in ('1','2','3','4','5','E','N','e','n'):
             print("Error: Enter a valid choice.")
             continue
         if choice.upper() == 'E':
